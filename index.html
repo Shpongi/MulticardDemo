@@ -58,15 +58,14 @@
         <div class="mt-5 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <ol class="list-decimal space-y-2 pl-5 text-slate-700">
             <li>Enter your company name and contact details.</li>
-            <li>Select your campaign name and preferred currency.</li>
-            <li>Choose card design, branding assets, and message template.</li>
-            <li>Set recipient details (single upload or bulk import).</li>
-            <li>Define amount, delivery date, and redemption preferences.</li>
-            <li>Review all entries, confirm, and submit the form.</li>
+            <li>Select your preferred currency.</li>
+            <li>Enter the Multicard name.</li>
+            <li>Upload a PNG branding image.</li>
+            <li>Set the fixed amount.</li>
+            <li>Select relevant stores and submit the form.</li>
           </ol>
 
           <button id="openFormBtn" type="button" class="mt-6 inline-block rounded-xl bg-gradient-to-r from-blue-900 to-blue-700 px-5 py-3 font-semibold text-white no-underline transition hover:opacity-95">Click to Fill the Form</button>
-          <div id="submitResult" class="mt-4 hidden rounded-lg bg-slate-100 p-4 text-sm text-slate-700"></div>
         </div>
       </div>
     </section>
@@ -84,12 +83,21 @@
   </main>
 
   <div id="formModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/60 p-4">
-    <div class="max-h-[92vh] w-full max-w-3xl overflow-auto rounded-2xl bg-white p-6 shadow-2xl">
+    <div class="relative max-h-[92vh] w-full max-w-3xl overflow-auto rounded-2xl bg-white p-6 shadow-2xl">
+      <div id="submittingOverlay" class="absolute inset-0 z-20 hidden items-center justify-center rounded-2xl bg-white/90 p-6">
+        <div class="flex flex-col items-center gap-3 text-center">
+          <div class="h-9 w-9 animate-spin rounded-full border-4 border-slate-300 border-t-blue-700"></div>
+          <p class="text-sm font-semibold text-slate-700">Submitting your form...</p>
+          <p class="text-xs text-slate-500">Please wait. Do not close this window.</p>
+        </div>
+      </div>
+
       <div class="mb-4 flex items-start justify-between gap-4">
         <h3 class="text-xl font-bold">Multicard Setup Form</h3>
         <button id="closeFormBtn" type="button" class="rounded-md border border-slate-300 px-3 py-1 text-sm text-slate-600">Close</button>
       </div>
 
+      <div id="formScreen">
       <form id="multicardForm" class="space-y-5">
         <div>
           <label class="mb-1 block text-sm font-semibold">Company Name</label>
@@ -130,7 +138,8 @@
         <div class="grid gap-4 md:grid-cols-1">
           <div>
             <label class="mb-1 block text-sm font-semibold">Amount</label>
-            <input name="amount" type="number" min="1" required class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-600" />
+            <input id="amountInput" name="amount" type="text" inputmode="text" placeholder="eg 50,100,150" required class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-600" />
+            <p class="mt-1 text-xs text-slate-500">Use positive whole numbers. You can enter one amount or comma-separated amounts.</p>
           </div>
         </div>
 
@@ -141,6 +150,20 @@
 
         <button type="submit" class="w-full rounded-xl bg-blue-700 px-5 py-3 font-semibold text-white transition hover:bg-blue-800">Submit Form</button>
       </form>
+      </div>
+
+      <div id="successScreen" class="hidden py-8 text-center">
+        <div class="mx-auto mb-4 grid h-12 w-12 place-items-center rounded-full bg-emerald-100 text-emerald-700">
+          <span class="text-2xl">✓</span>
+        </div>
+        <h4 class="text-xl font-bold text-slate-800">Submission Successful</h4>
+        <p class="mx-auto mt-2 max-w-md text-sm text-slate-600">
+          Your Multicard setup request was submitted successfully. Our team can now continue processing it.
+        </p>
+        <button id="successCloseBtn" type="button" class="mt-6 rounded-xl bg-blue-700 px-5 py-3 font-semibold text-white transition hover:bg-blue-800">
+          Close
+        </button>
+      </div>
     </div>
   </div>
 
@@ -168,7 +191,7 @@
       ]
     });
 
-    const GOOGLE_DRIVE_WEBHOOK_URL = "";
+    const GOOGLE_DRIVE_API_PATH = "/api/upload-to-drive";
     const STORES_BY_CURRENCY = {
       USD: ["Amazon US", "Target", "Walmart", "Best Buy"],
       EUR: ["Zalando", "Carrefour", "MediaMarkt", "Decathlon"],
@@ -177,12 +200,17 @@
 
     const openFormBtn = document.getElementById("openFormBtn");
     const closeFormBtn = document.getElementById("closeFormBtn");
+    const successCloseBtn = document.getElementById("successCloseBtn");
     const formModal = document.getElementById("formModal");
+    const formScreen = document.getElementById("formScreen");
+    const successScreen = document.getElementById("successScreen");
+    const submittingOverlay = document.getElementById("submittingOverlay");
     const multicardForm = document.getElementById("multicardForm");
     const currencyCodeEl = document.getElementById("currencyCode");
     const storesContainer = document.getElementById("storesContainer");
-    const submitResult = document.getElementById("submitResult");
     const brandingImageEl = document.getElementById("brandingImage");
+    const amountInputEl = document.getElementById("amountInput");
+    let isSubmitting = false;
 
     function renderStores(currency) {
       const stores = STORES_BY_CURRENCY[currency] || [];
@@ -200,16 +228,29 @@
     }
 
     openFormBtn.addEventListener("click", function() {
+      isSubmitting = false;
+      showSubmittingState(false);
+      formScreen.classList.remove("hidden");
+      successScreen.classList.add("hidden");
       formModal.classList.remove("hidden");
       formModal.classList.add("flex");
     });
 
     closeFormBtn.addEventListener("click", function() {
+      if (isSubmitting) return;
       formModal.classList.add("hidden");
       formModal.classList.remove("flex");
     });
 
+    successCloseBtn.addEventListener("click", function() {
+      formModal.classList.add("hidden");
+      formModal.classList.remove("flex");
+      formScreen.classList.remove("hidden");
+      successScreen.classList.add("hidden");
+    });
+
     formModal.addEventListener("click", function(event) {
+      if (isSubmitting) return;
       if (event.target === formModal) {
         formModal.classList.add("hidden");
         formModal.classList.remove("flex");
@@ -221,6 +262,12 @@
     });
 
     renderStores(currencyCodeEl.value);
+
+    amountInputEl.addEventListener("input", function(event) {
+      var cleaned = String(event.target.value || "").replace(/[^0-9,]/g, "");
+      cleaned = cleaned.replace(/,+/g, ",").replace(/^,/, "");
+      event.target.value = cleaned;
+    });
 
     multicardForm.addEventListener("submit", async function(event) {
       event.preventDefault();
@@ -238,6 +285,19 @@
         return;
       }
 
+      const amountValue = String(formData.get("amount") || "").trim();
+      const amountList = amountValue
+        .split(",")
+        .map(function(v) { return v.trim(); })
+        .filter(function(v) { return v.length > 0; });
+      const hasInvalidAmount = amountList.length === 0 || amountList.some(function(v) {
+        return !/^[1-9][0-9]*$/.test(v);
+      });
+      if (hasInvalidAmount) {
+        alert("Amount must be positive whole numbers. Use one value or comma-separated values like 50,100,150.");
+        return;
+      }
+
       const payload = {
         folderName: formData.get("companyName"),
         companyName: formData.get("companyName"),
@@ -245,39 +305,77 @@
         contactEmail: formData.get("contactEmail"),
         currencyCode: formData.get("currencyCode"),
         multicardName: formData.get("multicardName"),
-        amount: formData.get("amount"),
+        amount: amountValue,
+        amountValues: amountList,
         selectedStores: selectedStores
       };
 
       try {
-        if (GOOGLE_DRIVE_WEBHOOK_URL) {
-          const uploadData = new FormData();
-          uploadData.append("metadata", JSON.stringify(payload));
-          uploadData.append("image", imageFile);
-          await fetch(GOOGLE_DRIVE_WEBHOOK_URL, {
-            method: "POST",
-            body: uploadData
-          });
+        isSubmitting = true;
+        showSubmittingState(true);
+
+        const imageBase64 = await fileToBase64(imageFile);
+        const uploadResponse = await fetch(GOOGLE_DRIVE_API_PATH, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            payload: payload,
+            imageBase64: imageBase64,
+            imageName: imageFile.name,
+            imageMimeType: imageFile.type
+          })
+        });
+
+        const uploadResult = await uploadResponse.json();
+        if (!uploadResponse.ok) {
+          throw new Error(uploadResult.details || uploadResult.error || "Upload endpoint returned non-200 status");
         }
 
-        submitResult.classList.remove("hidden");
-        submitResult.innerHTML =
-          "<p class='font-semibold'>Form submitted.</p>" +
-          "<p class='mt-1'>Folder name: <strong>" + payload.folderName + "</strong></p>" +
-          "<p class='mt-1'>Selected stores:</p>" +
-          "<ul class='mt-1 list-disc pl-5'>" +
-          payload.selectedStores.map(function(store) { return "<li>" + store + "</li>"; }).join("") +
-          "</ul>" +
-          (GOOGLE_DRIVE_WEBHOOK_URL
-            ? "<p class='mt-2 text-emerald-700'>Image upload request sent to Google Drive webhook.</p>"
-            : "<p class='mt-2 text-amber-700'>Google Drive webhook URL is not set yet. Add it to GOOGLE_DRIVE_WEBHOOK_URL to enable upload.</p>");
+        // Reset immediately after success so next open is a clean form.
+        multicardForm.reset();
+        currencyCodeEl.value = "USD";
+        renderStores("USD");
 
-        formModal.classList.add("hidden");
-        formModal.classList.remove("flex");
+        formScreen.classList.add("hidden");
+        successScreen.classList.remove("hidden");
       } catch (error) {
-        alert("Submission failed. Please try again.");
+        alert("Submission failed: " + error.message);
+      } finally {
+        isSubmitting = false;
+        showSubmittingState(false);
       }
     });
+
+    function fileToBase64(file) {
+      return new Promise(function(resolve, reject) {
+        const reader = new FileReader();
+        reader.onload = function() {
+          const value = String(reader.result || "");
+          const base64 = value.split(",")[1] || "";
+          resolve(base64);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function showSubmittingState(enabled) {
+      if (enabled) {
+        submittingOverlay.classList.remove("hidden");
+        submittingOverlay.classList.add("flex");
+      } else {
+        submittingOverlay.classList.add("hidden");
+        submittingOverlay.classList.remove("flex");
+      }
+
+      closeFormBtn.disabled = enabled;
+      multicardForm.querySelectorAll("input, select, textarea, button").forEach(function(el) {
+        el.disabled = enabled;
+      });
+      closeFormBtn.disabled = enabled;
+    }
   </script>
 </body>
 </html>
