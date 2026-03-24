@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Multicard - One Pager</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased">
+  <header class="border-b border-white/10 bg-gradient-to-r from-slate-950 to-slate-800">
+    <div class="mx-auto flex h-20 w-[92vw] max-w-6xl items-center">
+      <img class="block max-h-12 w-auto" src="https://www.globetopper.com/wp-content/uploads/2023/08/GT-Grad-white-1.png" alt="Globetopper logo" />
+    </div>
+  </header>
+
+  <main>
+    <section class="py-16 md:py-20">
+      <div class="mx-auto grid w-[92vw] max-w-6xl items-center gap-8 md:grid-cols-2">
+        <div>
+          <h1 class="mb-3 text-3xl font-bold leading-tight md:text-5xl">Multicard - A flexible Gift Card Solution</h1>
+          <p class="max-w-3xl text-base text-slate-600 md:text-lg">
+            A powerful, flexible gift card solution that reduces friction at purchase, lets recipients choose
+            the brand they want with a fully branded redemption experience.
+          </p>
+        </div>
+        <div class="grid min-h-[320px] place-items-center rounded-2xl border-2 border-dashed border-slate-300 bg-indigo-50 p-4 text-center font-semibold text-indigo-600">
+          Hero Image Placeholder<br />
+          (Your image will go here)
+        </div>
+      </div>
+    </section>
+
+    <section class="py-16 md:py-20">
+      <div class="mx-auto grid w-[92vw] max-w-6xl items-start gap-7 md:grid-cols-2">
+        <div>
+          <h2 class="mb-3 text-2xl font-bold leading-tight md:text-3xl">Why Teams Choose Multicard</h2>
+          <p class="text-slate-600">
+            Launch a modern gifting experience with simple setup, flexible recipient choice, and a smooth redemption
+            journey. This section can later include your exact value propositions and proof points.
+          </p>
+        </div>
+        <div class="grid justify-start gap-4 sm:grid-cols-2 md:justify-end">
+          <div class="grid h-[150px] w-full min-w-[220px] max-w-[250px] place-items-center rounded-xl border border-slate-200 bg-gradient-to-br from-blue-100 to-indigo-50 text-sm font-semibold text-blue-900">Image 1 (250x150)</div>
+          <div class="grid h-[150px] w-full min-w-[220px] max-w-[250px] place-items-center rounded-xl border border-slate-200 bg-gradient-to-br from-blue-100 to-indigo-50 text-sm font-semibold text-blue-900">Image 2 (250x150)</div>
+          <div class="grid h-[150px] w-full min-w-[220px] max-w-[250px] place-items-center rounded-xl border border-slate-200 bg-gradient-to-br from-blue-100 to-indigo-50 text-sm font-semibold text-blue-900">Image 3 (250x150)</div>
+          <div class="grid h-[150px] w-full min-w-[220px] max-w-[250px] place-items-center rounded-xl border border-slate-200 bg-gradient-to-br from-blue-100 to-indigo-50 text-sm font-semibold text-blue-900">Image 4 (250x150)</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="setup-form" class="py-16 md:py-20">
+      <div class="mx-auto w-[92vw] max-w-6xl">
+        <h2 class="mb-3 text-2xl font-bold leading-tight md:text-3xl">Set Up Your Multicard</h2>
+        <p class="text-slate-600">
+          Follow these simple steps to create and configure your Multicard. The process is straightforward and only takes a few minutes.
+        </p>
+
+        <div class="mt-5 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <ol class="list-decimal space-y-2 pl-5 text-slate-700">
+            <li>Enter your company name and contact details.</li>
+            <li>Select your campaign name and preferred currency.</li>
+            <li>Choose card design, branding assets, and message template.</li>
+            <li>Set recipient details (single upload or bulk import).</li>
+            <li>Define amount, delivery date, and redemption preferences.</li>
+            <li>Review all entries, confirm, and submit the form.</li>
+          </ol>
+
+          <button id="openFormBtn" type="button" class="mt-6 inline-block rounded-xl bg-gradient-to-r from-blue-900 to-blue-700 px-5 py-3 font-semibold text-white no-underline transition hover:opacity-95">Click to Fill the Form</button>
+          <div id="submitResult" class="mt-4 hidden rounded-lg bg-slate-100 p-4 text-sm text-slate-700"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="playground" class="py-16 md:py-20">
+      <div class="mx-auto w-[92vw] max-w-6xl">
+        <h2 class="mb-3 text-2xl font-bold leading-tight md:text-3xl">Playground Demo</h2>
+        <p class="text-slate-600">Interactive demo loaded using the Giftit SDK.</p>
+
+        <div class="mt-5 h-screen rounded-2xl border border-slate-200 bg-white p-5">
+          <div id="iframe-container" style="width: 100%;"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="formModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/60 p-4">
+    <div class="max-h-[92vh] w-full max-w-3xl overflow-auto rounded-2xl bg-white p-6 shadow-2xl">
+      <div class="mb-4 flex items-start justify-between gap-4">
+        <h3 class="text-xl font-bold">Multicard Setup Form</h3>
+        <button id="closeFormBtn" type="button" class="rounded-md border border-slate-300 px-3 py-1 text-sm text-slate-600">Close</button>
+      </div>
+
+      <form id="multicardForm" class="space-y-5">
+        <div>
+          <label class="mb-1 block text-sm font-semibold">Company Name</label>
+          <input name="companyName" required class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-600" />
+        </div>
+
+        <div class="grid gap-4 md:grid-cols-2">
+          <div>
+            <label class="mb-1 block text-sm font-semibold">Contact Name</label>
+            <input name="contactName" required class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-600" />
+          </div>
+          <div>
+            <label class="mb-1 block text-sm font-semibold">Contact Email</label>
+            <input name="contactEmail" type="email" required class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-600" />
+          </div>
+        </div>
+
+        <div>
+          <label class="mb-1 block text-sm font-semibold">Currency</label>
+          <select id="currencyCode" name="currencyCode" required class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-600">
+            <option value="USD">USD</option>
+            <option value="EUR">EUR</option>
+            <option value="GBP">GBP</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="mb-1 block text-sm font-semibold">Multicard Name</label>
+          <input name="multicardName" required class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-600" />
+        </div>
+
+        <div>
+          <label class="mb-1 block text-sm font-semibold">Branding Image (PNG only)</label>
+          <input id="brandingImage" name="brandingImage" type="file" accept=".png,image/png" required class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-blue-600" />
+          <p class="mt-1 text-xs text-slate-500">Only PNG files are allowed.</p>
+        </div>
+
+        <div class="grid gap-4 md:grid-cols-1">
+          <div>
+            <label class="mb-1 block text-sm font-semibold">Amount</label>
+            <input name="amount" type="number" min="1" required class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-600" />
+          </div>
+        </div>
+
+        <div>
+          <p class="mb-2 block text-sm font-semibold">Stores (checkbox list based on currency)</p>
+          <div id="storesContainer" class="grid gap-2 rounded-lg border border-slate-200 bg-slate-50 p-3 sm:grid-cols-2"></div>
+        </div>
+
+        <button type="submit" class="w-full rounded-xl bg-blue-700 px-5 py-3 font-semibold text-white transition hover:bg-blue-800">Submit Form</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://d6p9ns0t4edbh.cloudfront.net/sdk/v1/giftit.js"></script>
+  <script>
+    var giftitSDK = new GiftitSDK({
+      element: {
+        selector: "#iframe-container",
+        width: "100%",
+        height: "90vh",
+        lightboxMode: false
+      },
+      partnerId: 9912,
+      gifter: {
+        name: "John",
+        email: "john@testemail.com"
+      },
+      currencyCode: "USD",
+      sendDate: new Date(),
+      recipients: [
+        {
+          name: "Marry",
+          email: "marry@testemail.com"
+        }
+      ]
+    });
+
+    const GOOGLE_DRIVE_WEBHOOK_URL = "";
+    const STORES_BY_CURRENCY = {
+      USD: ["Amazon US", "Target", "Walmart", "Best Buy"],
+      EUR: ["Zalando", "Carrefour", "MediaMarkt", "Decathlon"],
+      GBP: ["Tesco", "Argos", "John Lewis", "Currys"]
+    };
+
+    const openFormBtn = document.getElementById("openFormBtn");
+    const closeFormBtn = document.getElementById("closeFormBtn");
+    const formModal = document.getElementById("formModal");
+    const multicardForm = document.getElementById("multicardForm");
+    const currencyCodeEl = document.getElementById("currencyCode");
+    const storesContainer = document.getElementById("storesContainer");
+    const submitResult = document.getElementById("submitResult");
+    const brandingImageEl = document.getElementById("brandingImage");
+
+    function renderStores(currency) {
+      const stores = STORES_BY_CURRENCY[currency] || [];
+      storesContainer.innerHTML = stores
+        .map(function(store, index) {
+          const id = "store-" + currency + "-" + index;
+          return (
+            '<label for="' + id + '" class="flex items-center gap-2 rounded-md bg-white p-2 text-sm">' +
+            '<input id="' + id + '" name="stores" type="checkbox" value="' + store + '" class="h-4 w-4 rounded border-slate-300 text-blue-700 focus:ring-blue-600" />' +
+            "<span>" + store + "</span>" +
+            "</label>"
+          );
+        })
+        .join("");
+    }
+
+    openFormBtn.addEventListener("click", function() {
+      formModal.classList.remove("hidden");
+      formModal.classList.add("flex");
+    });
+
+    closeFormBtn.addEventListener("click", function() {
+      formModal.classList.add("hidden");
+      formModal.classList.remove("flex");
+    });
+
+    formModal.addEventListener("click", function(event) {
+      if (event.target === formModal) {
+        formModal.classList.add("hidden");
+        formModal.classList.remove("flex");
+      }
+    });
+
+    currencyCodeEl.addEventListener("change", function(event) {
+      renderStores(event.target.value);
+    });
+
+    renderStores(currencyCodeEl.value);
+
+    multicardForm.addEventListener("submit", async function(event) {
+      event.preventDefault();
+
+      const formData = new FormData(multicardForm);
+      const imageFile = brandingImageEl.files[0];
+      if (!imageFile || imageFile.type !== "image/png" || !imageFile.name.toLowerCase().endsWith(".png")) {
+        alert("Please upload a valid PNG file.");
+        return;
+      }
+
+      const selectedStores = formData.getAll("stores");
+      if (selectedStores.length === 0) {
+        alert("Please select at least one store.");
+        return;
+      }
+
+      const payload = {
+        folderName: formData.get("companyName"),
+        companyName: formData.get("companyName"),
+        contactName: formData.get("contactName"),
+        contactEmail: formData.get("contactEmail"),
+        currencyCode: formData.get("currencyCode"),
+        multicardName: formData.get("multicardName"),
+        amount: formData.get("amount"),
+        selectedStores: selectedStores
+      };
+
+      try {
+        if (GOOGLE_DRIVE_WEBHOOK_URL) {
+          const uploadData = new FormData();
+          uploadData.append("metadata", JSON.stringify(payload));
+          uploadData.append("image", imageFile);
+          await fetch(GOOGLE_DRIVE_WEBHOOK_URL, {
+            method: "POST",
+            body: uploadData
+          });
+        }
+
+        submitResult.classList.remove("hidden");
+        submitResult.innerHTML =
+          "<p class='font-semibold'>Form submitted.</p>" +
+          "<p class='mt-1'>Folder name: <strong>" + payload.folderName + "</strong></p>" +
+          "<p class='mt-1'>Selected stores:</p>" +
+          "<ul class='mt-1 list-disc pl-5'>" +
+          payload.selectedStores.map(function(store) { return "<li>" + store + "</li>"; }).join("") +
+          "</ul>" +
+          (GOOGLE_DRIVE_WEBHOOK_URL
+            ? "<p class='mt-2 text-emerald-700'>Image upload request sent to Google Drive webhook.</p>"
+            : "<p class='mt-2 text-amber-700'>Google Drive webhook URL is not set yet. Add it to GOOGLE_DRIVE_WEBHOOK_URL to enable upload.</p>");
+
+        formModal.classList.add("hidden");
+        formModal.classList.remove("flex");
+      } catch (error) {
+        alert("Submission failed. Please try again.");
+      }
+    });
+  </script>
+</body>
+</html>
